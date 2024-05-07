@@ -1,0 +1,23 @@
+version: "3"
+
+services:
+  backend:
+    hostname: reversed-coffee.lan
+    image: node:alpine
+    working_dir: /app
+    command: npm run dev
+    environment:
+      - PORT=443
+    volumes:
+      - "./:/app"
+    networks:
+      - extern
+    restart: unless-stopped
+
+networks:
+  extern:
+    external: true
+
+volumes:
+  nginx_www:
+    external: true

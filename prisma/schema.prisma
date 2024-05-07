@@ -1,0 +1,35 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "sqlite"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id           String       @id @default(cuid())
+    email        String       @unique
+    created      DateTime     @default(now())
+    username     String?      @unique
+    password     String       @map("passwordHash")
+    salt         String
+    stats        UserStats    @relation(fields: [statsId], references: [id])
+    statsId      Int          @unique
+}
+
+model UserStats {
+    id           Int      @id @default(autoincrement())
+    user         User?
+    coins        Int      @default(0)
+    crystals     Int      @default(0)
+    copper       Int      @default(0)
+    level        Int      @default(1)
+    rank         Int      @default(1)
+    strength     Int      @default(1)
+    soldiers     Int      @default(0)
+    grappleHooks Int      @default(0)
+    potions1     Int      @default(0)
+    potions2     Int      @default(0)
+    swords       Int      @default(0)
+}
