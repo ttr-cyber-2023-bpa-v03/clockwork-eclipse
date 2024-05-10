@@ -1,13 +1,14 @@
 import express from "express";
 import { Security } from "@utils/security";
 
-export default function(req: express.Request, res: express.Response, next: express.NextFunction) {
-    // Check for a Bearer token header
-    let token = req.headers["authorization"];
+import promisify from "util.promisify";
+import cookieParser from "cookie-parser";
+const parseCookies = promisify(cookieParser());
 
-    if (!token || !token.startsWith("Bearer "))
-        return res.status(401).json({ error: "Unauthorized" });
-    token = token.substring("Bearer ".length);
+export default async function(req: express.Request, res: express.Response, next: express.NextFunction) {
+    // Parse the cookies
+    await parseCookies(req, res);
+    let token = req.cookies["userToken"];
     
     // Verify the token
     let user: any;

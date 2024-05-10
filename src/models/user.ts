@@ -44,6 +44,34 @@ export interface UserAuth {
     user: true;
 }
 
+// CRUD operations for the database
+export enum DatabaseOperation {
+    CREATE = "CREATE",
+    READ = "READ",
+    UPDATE = "UPDATE",
+    DELETE = "DELETE"
+}
+
+export class UserAuthError extends Error {
+    public readonly status: LoginStatus;
+
+    constructor(status: LoginStatus) {
+        super("Invalid credentials");
+        this.status = status;
+    }
+}
+
+export class DatabaseError extends Error {
+    public readonly operation: DatabaseOperation;
+    public readonly prismaError: Prisma.PrismaClientKnownRequestError;
+
+    constructor(operation: DatabaseOperation, prismaError: Prisma.PrismaClientKnownRequestError) {
+        super("Failed to contact database");
+        this.operation = operation;
+        this.prismaError = prismaError;
+    }
+}
+
 export class User {
     private static checkUsername(username: string): UsernameValidity {
         const ALPHANUMERIC_REGEX = /^[a-zA-Z0-9_]+$/;
@@ -147,21 +175,23 @@ export class User {
             const user = await prisma.user.create({
                 data: { username, email, salt, password, statsId: stats.id }
             });
+
             return user;
         }
         catch (e) {
-            console.error(e);
-            throw new Error("Failed to contact database");
+            if (e instanceof Prisma.PrismaClientKnownRequestError)
+                throw new DatabaseError(DatabaseOperation.CREATE, e);
+            throw e;
         }
     }
 
     public static async authenticate(email: string, givenPassword: string): Promise<string> {
         const { id, salt, password } = (await prisma.user.findUnique({ where: { email } }))!;
-        
 
         const success = await Security.verifyPasswd(givenPassword, password, salt);
         if (!success)
             throw new Error("Invalid password");
+        
         return Security.createToken<UserAuth>({ id, user: true }, { expiresIn: "1d" });
     }
 }

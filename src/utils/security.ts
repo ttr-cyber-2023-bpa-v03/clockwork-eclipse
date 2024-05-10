@@ -3,7 +3,7 @@ import crypto from "crypto";
 import jwt, { SignOptions } from "jsonwebtoken";
 
 export class Security {
-    // Create an HMAC with the password and the pepper and use a salt to primarily
+    // Create an HMAC with a password-pepper combination and use a salt to primarily
     // prevent chances of a collision.
     public static hmacPasswd(password: string, salt: string | Buffer): string {
         const pepper = Buffer.from(process.env.PASSWORD_PEPPER!, "base64");

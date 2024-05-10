@@ -1,7 +1,6 @@
 import express from "express";
 
-import { Route } from "@logic/server/route";
-import { Endpoint } from "@logic/server/endpoint";
+import { Route, Endpoint } from "@logic/server";
 
 @Route("/api")
 export default class RootRoute {

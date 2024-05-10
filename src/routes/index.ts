@@ -1,12 +1,9 @@
 import express from "express";
 
-import { Route } from "@logic/server/route";
-import { Endpoint } from "@logic/server/endpoint";
+import path from "path";
+import * as paths from "@src/paths";
 
-@Route("/")
-export default class RootRoute {
-    @Endpoint("GET", "/")
-    public async root(req: express.Request, res: express.Response) {
-        res.status(200).end("Hello, world!");
-    }
-}
+import { Route, Static, Endpoint } from "@logic/server";
+
+@Static("/", path.join(paths.staticDir, "EnglishDesigns"))
+export default class RootRoute {}

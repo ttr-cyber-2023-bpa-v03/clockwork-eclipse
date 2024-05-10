@@ -6,7 +6,8 @@ import express from "express";
 import { Server as WebSocketServer } from "socket.io";
 import { validatePort } from "../helpers";
 
-import * as routeUtil from "./route";
+import { register as registerRoute } from "./route";
+import { register as registerStatic } from "./static";
 
 export interface HostOptions {
     address?: string;
@@ -20,7 +21,7 @@ export interface HostOptions {
         websocket?: boolean;
     };
 }
-fs
+
 export class Host {
     private options!: HostOptions;
     public httpServer?: http.Server;
@@ -172,11 +173,21 @@ export class Host {
         for (const file of files) {
             const routePath = path.join(routesDir, file.name);
             const module = await import(`file://${routePath}`);
+
             if (!module.default) {
                 console.warn(`No export in ${routePath}`);
                 continue;
             }
-            routeUtil.register(this.app!, module.default);
+
+            const type = Reflect.getMetadata("meta:type", module.default);
+            switch (type) {
+                case "Route":
+                    registerRoute(this.express, module.default);
+                    break;
+                case "StaticRoute":
+                    registerStatic(this.express, module.default);
+                    break;
+            }
         }
 
         const dirs = entries.filter(dir => dir.isDirectory());
