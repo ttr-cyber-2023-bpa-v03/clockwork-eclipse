@@ -5,5 +5,5 @@ import * as paths from "@src/paths";
 
 import { Route, Static, Endpoint } from "@logic/server";
 
-@Static("/", path.join(paths.staticDir, "EnglishDesigns"))
+@Static("/", path.join(paths.staticDir))
 export default class RootRoute {}
